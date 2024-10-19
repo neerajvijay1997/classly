@@ -6,3 +6,5 @@ type User struct {
 	Email    string
 }
 
+// TODO: Add constructor for User struct
+

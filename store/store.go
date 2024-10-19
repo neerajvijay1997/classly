@@ -7,4 +7,7 @@ import (
 type Store interface {
 	SetUser(user types.User)
 	GetUser(userName string) (types.User, bool)
+	SetClass(class types.Class)
+	GetClass(classId string) (types.Class, bool)
+	GetAllClasses() []types.Class
 }
