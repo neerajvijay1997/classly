@@ -10,4 +10,6 @@ type Store interface {
 	SetClass(class types.Class)
 	GetClass(classId string) (types.Class, bool)
 	GetAllClasses() []types.Class
+	AddUserToClassSession(sessionId string, userName string)
+	AddOfferedClassToUser(userName string, classId string)
 }

@@ -12,4 +12,3 @@ type Class struct {
 }
 
 // TODO: Add constructor for Class struct
-
