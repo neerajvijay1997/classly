@@ -1,17 +1,37 @@
 package httpserver
 
 import (
-	"fmt"
+	"classly/classly"
+	"log"
 	"net/http"
+	"sync"
 )
 
-func InitializeServer() {
-	r := SetupRoutes()
+type ClasslyServer struct {
+	classly   *classly.Classly
+	waitGroup *sync.WaitGroup
+}
 
-	// TODO: Retrieve the server port from the environment variables
-	fmt.Println("Server is listening on port 8080...")
-	err := http.ListenAndServe(":8080", r)
-	if err != nil {
-		fmt.Println("Error starting server:", err)
+func InitializeClasslyServer(classly *classly.Classly) *ClasslyServer {
+	cs := ClasslyServer{
+		classly:   classly,
+		waitGroup: &sync.WaitGroup{},
 	}
+	routes := SetupRoutes()
+
+	cs.waitGroup.Add(1)
+	go func() {
+		// TODO: Retrieve the server port from the environment variables
+		log.Println("Server is listening on port 8080...")
+		if err := http.ListenAndServe(":8080", routes); err != nil {
+			log.Fatalf("Server failed to start: %v", err)
+		}
+	}()
+
+	return &cs
+}
+
+func (cs *ClasslyServer) Close() {
+	log.Println("Shutting down the server...")
+	cs.waitGroup.Done()
 }
