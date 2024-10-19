@@ -1,17 +1,18 @@
 package main
 
 import (
-	"classly/classly"
-	httpserver "classly/http-server"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"classly/classly"
+	httpserver "classly/http-server"
+	"classly/store"
 )
 
 func main() {
-	// TODO: Initialize store
-
-	classly := classly.InitializeClassly()
+	memStore := store.NewMemStore()
+	classly := classly.InitializeClassly(memStore)
 	classlyServer := httpserver.InitializeClasslyServer(classly)
 
 	stopChan := make(chan os.Signal, 2)
