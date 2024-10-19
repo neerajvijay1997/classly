@@ -17,7 +17,7 @@ func InitializeClasslyServer(classly *classly.Classly) *ClasslyServer {
 		classly:   classly,
 		waitGroup: &sync.WaitGroup{},
 	}
-	routes := SetupRoutes()
+	routes := cs.SetupRoutes()
 
 	cs.waitGroup.Add(1)
 	go func() {
