@@ -46,6 +46,32 @@ func (cs *ClasslyServer) getUserDetails(w http.ResponseWriter, r *http.Request) 
 	cs.writeJSONResponse(w, http.StatusOK, response)
 }
 
+func (cs *ClasslyServer) getBookedClasses(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userName := params["username"]
+
+	bookedClasses, err := cs.classly.GetBookedClasses(userName)
+	if err != nil {
+		cs.writeErrorResponse(w, http.StatusInternalServerError, "failed to get booked classes")
+		return
+	}
+
+	cs.writeJSONResponse(w, http.StatusOK, bookedClasses)
+}
+
+func (cs *ClasslyServer) getClassesStatus(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userName := params["username"]
+
+	classesStatus, err := cs.classly.GetClassesStatus(userName)
+	if err != nil {
+		cs.writeErrorResponse(w, http.StatusInternalServerError, "failed to get classes status")
+		return
+	}
+
+	cs.writeJSONResponse(w, http.StatusOK, classesStatus)
+}
+
 func (cs *ClasslyServer) createClass(w http.ResponseWriter, r *http.Request) {
 	var request CreateClassRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {

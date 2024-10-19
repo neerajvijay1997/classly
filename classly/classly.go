@@ -24,9 +24,11 @@ func (cly *Classly) CreateUser(name string, email string) string {
 
 	// TODO: Generate unique usernames on the server side
 	user := types.User{
-		UserName: userName,
-		Name:     name,
-		Email:    email,
+		UserName:        userName,
+		Name:            name,
+		Email:           email,
+		BookedClasses:   make(types.BookedClassesMap),
+		CreatedClassIds: make([]string, 0),
 	}
 
 	cly.store.SetUser(user)
@@ -70,7 +72,7 @@ func (cly *Classly) CreateClass(userName, className string, startDateStr, endDat
 	}
 
 	cly.store.SetClass(class)
-	cly.store.AddOfferedClassToUser(userName, classId)
+	cly.store.UpdateUserWithCreatedClass(userName, classId)
 
 	return classId, nil
 }
@@ -79,12 +81,15 @@ func (cly *Classly) GetAllClasses() []types.Class {
 	return cly.store.GetAllClasses()
 }
 
-func (cly *Classly) GetOfferedClassesStatus(userName string) {
+func (cly *Classly) GetClassesStatus(userName string) ([]types.ClassStatus, error) {
+	// TODO: If class offered empty return empty arrray or error
 
+	return cly.store.GetClassesStatus(userName)
 }
 
-func (cly *Classly) GetEnrolledClassesStatus(userName string) {
-
+func (cly *Classly) GetBookedClasses(userName string) ([]types.BookedClass, error) {
+	// TODO: If booked class empty return empty arrray
+	return cly.store.GetBookedClasses(userName)
 }
 
 func (cly *Classly) BookClass(userName string, classId string, bookingDateStr string) (string, error) {
@@ -96,22 +101,13 @@ func (cly *Classly) BookClass(userName string, classId string, bookingDateStr st
 		return "", fmt.Errorf("invalid booking date format")
 	}
 
-	classSessionId := generateSessionId(classId, bookingDate)
-	cly.store.AddUserToClassSession(classSessionId, userName)
+	classSessionId, _ := cly.store.BookClass(userName, classId, bookingDate)
 
 	return classSessionId, nil
 }
 
 func (cly *Classly) GetVersion() string {
 	return "Classly-v0.1.0"
-}
-
-func generateSessionId(classId string, bookingDate time.Time) string {
-	// TODO: Use constant
-	formattedTime := bookingDate.Format("2006-01-02")
-	sessionId := fmt.Sprintf("%s-%s", classId, formattedTime)
-	return sessionId
-
 }
 
 // TODO: Move to utils package

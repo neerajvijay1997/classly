@@ -12,6 +12,8 @@ func (cs *ClasslyServer) SetupRoutes() *mux.Router {
 	r.HandleFunc("/signup", cs.signUp).Methods("POST")
 	r.HandleFunc("/classes", cs.createClass).Methods("POST")
 	r.HandleFunc("/bookings", cs.bookClass).Methods("POST")
+	r.HandleFunc("/booked-classes/{username}", cs.getBookedClasses).Methods("GET")
+	r.HandleFunc("/classes-status/{username}", cs.getClassesStatus).Methods("GET")
 
 	return r
 }

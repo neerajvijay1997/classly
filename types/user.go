@@ -1,12 +1,19 @@
 package types
 
-type User struct {
-	UserName string
-	Name     string
-	Email    string
+import (
+	"time"
+)
 
-	BookedClasses  []string
-	OfferedClasses []string
+type User struct {
+	UserName string `json:"user_name"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+
+	BookedClasses   BookedClassesMap `json:"-"`
+	CreatedClassIds []string         `json:"-"`
 }
 
 // TODO: Add constructor for User struct
+
+type BookedClassesMap map[ClassId][]time.Time
+type ClassId = string
