@@ -4,6 +4,7 @@ import (
 	"classly/store"
 	"classly/utils"
 	"fmt"
+	"time"
 
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
@@ -46,24 +47,11 @@ func (cly *Classly) GetUserInfo(userName string) (utils.User, bool) {
 }
 
 // CreateClass allows a user to create a new class with the specified details.
-func (cly *Classly) CreateClass(userName, className string, startDateStr, endDateStr string, capacity uint32) (string, error) {
-	_, exist := cly.store.GetUser(userName)
-	if !exist {
-		return "", fmt.Errorf("user not found")
-	}
-
-	startDate, err := utils.ParseTime(startDateStr)
+func (cly *Classly) CreateClass(userName, className, description string, startDateStr, endDateStr string, capacity uint32) (string, error) {
+	// Validate class details
+	startDate, endDate, err := cly.validateClassDetails(userName, startDateStr, endDateStr)
 	if err != nil {
-		return "", fmt.Errorf("invalid start date format")
-	}
-
-	endDate, err := utils.ParseTime(endDateStr)
-	if err != nil {
-		return "", fmt.Errorf("invalid end date format")
-	}
-
-	if endDate.Before(startDate) {
-		return "", fmt.Errorf("end date must be after start date")
+		return "", err
 	}
 
 	classId, err := gonanoid.New(5)
@@ -74,6 +62,7 @@ func (cly *Classly) CreateClass(userName, className string, startDateStr, endDat
 	class := utils.Class{
 		Id:                    classId,
 		ClassName:             className,
+		Description:           description,
 		ClassProviderUserName: userName,
 		Capacity:              capacity,
 		StartDate:             startDate,
@@ -93,6 +82,34 @@ func (cly *Classly) CreateClass(userName, className string, startDateStr, endDat
 	return classId, nil
 }
 
+// validateClassDetails checks if the user exists and validates the start and end dates.
+func (cly *Classly) validateClassDetails(userName, startDateStr, endDateStr string) (time.Time, time.Time, error) {
+	_, exist := cly.store.GetUser(userName)
+	if !exist {
+		return time.Time{}, time.Time{}, fmt.Errorf("user not found")
+	}
+
+	startDate, err := utils.ParseTime(startDateStr)
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("invalid start date format")
+	}
+
+	if startDate.Before(time.Now()) {
+		return time.Time{}, time.Time{}, fmt.Errorf("start date must be in the future")
+	}
+
+	endDate, err := utils.ParseTime(endDateStr)
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("invalid end date format")
+	}
+
+	if endDate.Before(startDate) {
+		return time.Time{}, time.Time{}, fmt.Errorf("end date must be after start date")
+	}
+
+	return startDate, endDate, nil
+}
+
 // GetAllClasses retrieves all currently available classes from the store.
 func (cly *Classly) GetAllClasses() ([]utils.Class, error) {
 	return cly.store.GetAllClasses()
@@ -110,23 +127,10 @@ func (cly *Classly) GetBookedClasses(userName string) ([]utils.BookedClass, erro
 
 // BookClass allows a user to book a specific class on a given date.
 func (cly *Classly) BookClass(userName string, classId string, bookingDateStr string) (string, error) {
-	_, userExist := cly.store.GetUser(userName)
-	if !userExist {
-		return "", fmt.Errorf("user not found")
-	}
-
-	class, classExist := cly.store.GetClass(classId)
-	if !classExist {
-		return "", fmt.Errorf("class not found")
-	}
-
-	if class.ClassProviderUserName == userName {
-		return "", fmt.Errorf("class provider cannot be class member")
-	}
-
-	bookingDate, err := utils.ParseTime(bookingDateStr)
+	// Validate the booking information
+	bookingDate, err := cly.validateBooking(userName, classId, bookingDateStr)
 	if err != nil {
-		return "", fmt.Errorf("invalid booking date format")
+		return "", err
 	}
 
 	classSessionId, err := cly.store.BookClass(userName, classId, bookingDate)
@@ -135,6 +139,46 @@ func (cly *Classly) BookClass(userName string, classId string, bookingDateStr st
 	}
 
 	return classSessionId, nil
+}
+
+// validateBooking checks if the user exists, if the class exists, if the user is not the class provider, and if the booking date is valid.
+func (cly *Classly) validateBooking(userName string, classId string, bookingDateStr string) (time.Time, error) {
+	user, userExist := cly.store.GetUser(userName)
+	if !userExist {
+		return time.Time{}, fmt.Errorf("user not found")
+	}
+
+	class, classExist := cly.store.GetClass(classId)
+	if !classExist {
+		return time.Time{}, fmt.Errorf("class not found")
+	}
+
+	// Ensure that the class provider cannot book their own class
+	if class.ClassProviderUserName == userName {
+		return time.Time{}, fmt.Errorf("class provider cannot be class member")
+	}
+
+	bookingDate, err := utils.ParseTime(bookingDateStr)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("invalid booking date format")
+	}
+
+	// Check if the user has a booking on the provided date.
+	bookedClassSessions, classSessionExists := user.BookedClasses[classId]
+	if classSessionExists {
+		for _, classSession := range bookedClassSessions {
+			if classSession.Equal(bookingDate) {
+				return time.Time{}, fmt.Errorf("booking exist for provided date %v", bookingDate)
+			}
+		}
+	}
+
+	// Check if the booking date is within the class's start and end dates
+	if bookingDate.Before(class.StartDate) || bookingDate.After(class.EndDate) {
+		return time.Time{}, fmt.Errorf("booking date must be between %s and %s", class.StartDate, class.EndDate)
+	}
+
+	return bookingDate, nil
 }
 
 // GetVersion returns the current version of the Classly application.

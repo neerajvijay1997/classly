@@ -33,7 +33,7 @@ func TestClasslyIntegration(t *testing.T) {
 	// User1 creates a class
 	startDateStr := time.Now().Add(24 * time.Hour).Format(utils.DateFormat) // Class starts in 1 day
 	endDateStr := time.Now().Add(96 * time.Hour).Format(utils.DateFormat)   // Class ends in 4 days
-	classID, err := cly.CreateClass(user1Name, "Yoga Class", startDateStr, endDateStr, 10)
+	classID, err := cly.CreateClass(user1Name, "Yoga Class", "Best yoga class available in the town", startDateStr, endDateStr, 10)
 	require.NoError(t, err, "Class creation should succeed")
 	require.NotEmpty(t, classID, "ClassID should not be empty")
 

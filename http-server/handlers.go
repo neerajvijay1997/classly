@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -16,13 +17,13 @@ func (cs *ClasslyServer) getVersion(w http.ResponseWriter, r *http.Request) {
 func (cs *ClasslyServer) signUp(w http.ResponseWriter, r *http.Request) {
 	var signUpRequest SignUpRequest
 	if err := json.NewDecoder(r.Body).Decode(&signUpRequest); err != nil {
-		cs.writeErrorResponse(w, http.StatusBadRequest, "Invalid input")
+		cs.writeErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("Invalid input in signup request: %v", err))
 		return
 	}
 
 	userName, err := cs.classly.CreateUser(signUpRequest.Name, signUpRequest.Email)
 	if err != nil {
-		cs.writeErrorResponse(w, http.StatusInternalServerError, "Failed to create user")
+		cs.writeErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("Failed to create user: %v", err))
 		return
 	}
 
@@ -39,7 +40,7 @@ func (cs *ClasslyServer) getUserDetails(w http.ResponseWriter, r *http.Request) 
 
 	user, exists := cs.classly.GetUserInfo(userName)
 	if !exists {
-		cs.writeErrorResponse(w, http.StatusNotFound, "User not found")
+		cs.writeErrorResponse(w, http.StatusNotFound, fmt.Sprintf("User %v not found", userName))
 		return
 	}
 
@@ -57,21 +58,45 @@ func (cs *ClasslyServer) getBookedClasses(w http.ResponseWriter, r *http.Request
 
 	bookedClasses, err := cs.classly.GetBookedClasses(userName)
 	if err != nil {
-		cs.writeErrorResponse(w, http.StatusInternalServerError, "failed to get booked classes")
+		cs.writeErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("Failed to get booked classes: %v", err))
 		return
 	}
 
-	cs.writeJSONResponse(w, http.StatusOK, bookedClasses)
+	var message string
+	if len(bookedClasses) == 0 {
+		message = "No booked classes found."
+	} else {
+		message = "Here are your booked classes."
+	}
+
+	response := GetBookedClassesResponse{
+		Message:       message,
+		BookedClasses: bookedClasses,
+	}
+
+	cs.writeJSONResponse(w, http.StatusOK, response)
 }
 
 func (cs *ClasslyServer) getAllClasses(w http.ResponseWriter, r *http.Request) {
 	classes, err := cs.classly.GetAllClasses()
 	if err != nil {
-		cs.writeErrorResponse(w, http.StatusInternalServerError, "failed to get all classes")
+		cs.writeErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("Failed to get all classes: %v", err))
 		return
 	}
 
-	cs.writeJSONResponse(w, http.StatusOK, classes)
+	var message string
+	if len(classes) == 0 {
+		message = "No classes are available at the moment."
+	} else {
+		message = "Here are the available classes."
+	}
+
+	response := GetAllClassesResponse{
+		Message: message,
+		Classes: classes,
+	}
+
+	cs.writeJSONResponse(w, http.StatusOK, response)
 }
 
 func (cs *ClasslyServer) getClassesStatus(w http.ResponseWriter, r *http.Request) {
@@ -80,23 +105,35 @@ func (cs *ClasslyServer) getClassesStatus(w http.ResponseWriter, r *http.Request
 
 	classesStatus, err := cs.classly.GetClassesStatus(userName)
 	if err != nil {
-		cs.writeErrorResponse(w, http.StatusInternalServerError, "failed to get classes status")
+		cs.writeErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("Failed to get classes status: %v", err))
 		return
 	}
 
-	cs.writeJSONResponse(w, http.StatusOK, classesStatus)
+	var message string
+	if len(classesStatus) == 0 {
+		message = "No created class found"
+	} else {
+		message = "Here are your created classes."
+	}
+
+	response := GetClassesStatusResponse{
+		Message:       message,
+		ClassesStatus: classesStatus,
+	}
+
+	cs.writeJSONResponse(w, http.StatusOK, response)
 }
 
 func (cs *ClasslyServer) createClass(w http.ResponseWriter, r *http.Request) {
 	var request CreateClassRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		cs.writeErrorResponse(w, http.StatusBadRequest, "Invalid input")
+		cs.writeErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("Invalid input in create class request: %v", err))
 		return
 	}
 
-	classID, err := cs.classly.CreateClass(request.UserName, request.ClassName, request.StartDate, request.EndDate, request.Capacity)
+	classID, err := cs.classly.CreateClass(request.UserName, request.ClassName, request.Description, request.StartDate, request.EndDate, request.Capacity)
 	if err != nil {
-		cs.writeErrorResponse(w, http.StatusInternalServerError, "Failed to create class")
+		cs.writeErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("Failed to create class: %v", err))
 		return
 	}
 
@@ -110,13 +147,13 @@ func (cs *ClasslyServer) createClass(w http.ResponseWriter, r *http.Request) {
 func (cs *ClasslyServer) bookClass(w http.ResponseWriter, r *http.Request) {
 	var request BookClassRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		cs.writeErrorResponse(w, http.StatusBadRequest, "Invalid input")
+		cs.writeErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("Invalid input in book class request: %v", err))
 		return
 	}
 
 	classSessionId, err := cs.classly.BookClass(request.UserName, request.ClassID, request.BookingDate)
 	if err != nil {
-		cs.writeErrorResponse(w, http.StatusInternalServerError, "Failed to book class")
+		cs.writeErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("Failed to book class: %v", err))
 		return
 	}
 

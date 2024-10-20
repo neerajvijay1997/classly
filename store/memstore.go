@@ -25,7 +25,7 @@ func (ms *MemStore) SetUser(user utils.User) error {
 	return nil
 }
 
-func (ms *MemStore) updateUserForClassSession(userName string, bookingDate time.Time, classId string) {
+func (ms *MemStore) updateUserForBookedClassSession(userName string, bookingDate time.Time, classId string) {
 	user := ms.users[userName]
 
 	bookingDates, exist := user.BookedClasses[classId]
@@ -81,15 +81,16 @@ func (ms *MemStore) BookClass(userName string, classId string, bookingDate time.
 
 	ms.classSessions[classSessionId] = session
 
-	ms.updateUserForClassSession(userName, bookingDate, classId)
+	ms.updateUserForBookedClassSession(userName, bookingDate, classId)
 	return classSessionId, nil
 }
 
 func (ms *MemStore) GetBookedClasses(userName string) ([]utils.BookedClass, error) {
 	var bookedClasses []utils.BookedClass
-	user, exist := ms.users[userName]
+
+	user, exist := ms.GetUser(userName)
 	if !exist {
-		return bookedClasses, fmt.Errorf("user doesnt exist")
+		return bookedClasses, fmt.Errorf("user doesnot exist")
 	}
 
 	for classId, classSessions := range user.BookedClasses {
@@ -112,9 +113,9 @@ func (ms *MemStore) GetBookedClasses(userName string) ([]utils.BookedClass, erro
 func (ms *MemStore) GetClassesStatus(userName string) ([]utils.ClassStatus, error) {
 	var classesStatus []utils.ClassStatus
 
-	user, exist := ms.users[userName]
+	user, exist := ms.GetUser(userName)
 	if !exist {
-		return classesStatus, fmt.Errorf("user doesnt exist")
+		return classesStatus, fmt.Errorf("user doesnot exist")
 	}
 
 	for _, classId := range user.CreatedClassIds {
