@@ -116,7 +116,29 @@ Users can check all available classes by running:
 curl -X GET http://localhost:8080/all-classes
 
 # Expected Output:
-# [{"id":"u2GWN","class_name":"Zumba Class","description":"","class_provider_user_name":"tA3Qj","start_date":"2024-10-20T00:00:00Z","end_date":"2024-10-25T00:00:00Z","capacity":30}]
+# {
+#   "message": "Here are the available classes.",
+#   "classes": [
+#     {
+#       "id": "Qig4H",
+#       "class_name": "Zumba Class",
+#       "description": "Best zumba class available",
+#       "class_provider_user_name": "SVKmU",
+#       "start_date": "2024-10-22T00:00:00Z",
+#       "end_date": "2024-10-25T00:00:00Z",
+#       "capacity": 30
+#     },
+#     {
+#       "id": "6Lvdh",
+#       "class_name": "Fitness Class",
+#       "description": "Best fitness class available",
+#       "class_provider_user_name": "1Gry3",
+#       "start_date": "2024-10-22T00:00:00Z",
+#       "end_date": "2024-10-25T00:00:00Z",
+#       "capacity": 30
+#     }
+#   ]
+# }
 ```
 
 ### Book a Class
@@ -142,7 +164,24 @@ Users can view their booked classes by using the following command, substituting
 curl -X GET http://localhost:8080/booked-classes/tA3Qj
 
 # Expected Output:
-# [{"id":"u2GWN","class_name":"Zumba Class","description":"","class_provider_user_name":"tA3Qj","start_date":"2024-10-20T00:00:00Z","end_date":"2024-10-25T00:00:00Z","capacity":30,"Sessions":["2024-10-21T00:00:00Z"]}]
+# {
+#   "message": "Here are your booked classes.",
+#   "booked_classes": [
+#     {
+#       "id": "Qig4H",
+#       "class_name": "Zumba Class",
+#       "description": "Best zumba class available",
+#       "class_provider_user_name": "SVKmU",
+#       "start_date": "2024-10-22T00:00:00Z",
+#       "end_date": "2024-10-25T00:00:00Z",
+#       "capacity": 30,
+#       "Sessions": [
+#         "2024-10-23T00:00:00Z",
+#         "2024-10-24T00:00:00Z"
+#       ]
+#     }
+#   ]
+# }
 ```
 
 ### Check Class Status
@@ -153,5 +192,34 @@ Class creators can check the status of their created classes by using the follow
 curl -X GET http://localhost:8080/classes-status/tA3Qj
 
 # Expected Output:
-# [{"id":"u2GWN","class_name":"Zumba Class","description":"","class_provider_user_name":"tA3Qj","start_date":"2024-10-20T00:00:00Z","end_date":"2024-10-25T00:00:00Z","capacity":30,"Sessions":{"2024-10-21T00:00:00Z":[{"user_name":"qH8OU","name":"Jane Smith","email":"jane.smith@example.com"}]}}]
+# {
+#   "message": "Here are your created classes.",
+#   "classes_status": [
+#     {
+#       "id": "Qig4H",
+#       "class_name": "Zumba Class",
+#       "description": "Best zumba class available",
+#       "class_provider_user_name": "SVKmU",
+#       "start_date": "2024-10-22T00:00:00Z",
+#       "end_date": "2024-10-25T00:00:00Z",
+#       "capacity": 30,
+#       "Sessions": {
+#         "2024-10-23T00:00:00Z": [
+#           {
+#             "user_name": "1Gry3",
+#             "name": "Jane Smith",
+#             "email": "jane.smith@example.com"
+#           }
+#         ],
+#         "2024-10-24T00:00:00Z": [
+#           {
+#             "user_name": "1Gry3",
+#             "name": "Jane Smith",
+#             "email": "jane.smith@example.com"
+#           }
+#         ]
+#       }
+#     }
+#   ]
+# }
 ```
