@@ -1,27 +1,26 @@
 package store
 
 import (
-	"classly/types"
+	"classly/utils"
 	"fmt"
-	"strings"
 	"time"
 )
 
 type MemStore struct {
-	users         map[string]types.User
-	classes       map[string]types.Class
+	users         map[string]utils.User
+	classes       map[string]utils.Class
 	classSessions map[string][]string
 }
 
 func NewMemStore() *MemStore {
 	return &MemStore{
-		users:         make(map[string]types.User),
-		classes:       make(map[string]types.Class),
+		users:         make(map[string]utils.User),
+		classes:       make(map[string]utils.Class),
 		classSessions: make(map[string][]string),
 	}
 }
 
-func (ms *MemStore) SetUser(user types.User) {
+func (ms *MemStore) SetUser(user utils.User) {
 	ms.users[user.UserName] = user
 }
 
@@ -45,22 +44,22 @@ func (ms *MemStore) UpdateUserWithCreatedClass(userName string, classId string) 
 	ms.users[userName] = user
 }
 
-func (ms *MemStore) GetUser(userName string) (types.User, bool) {
+func (ms *MemStore) GetUser(userName string) (utils.User, bool) {
 	user, ok := ms.users[userName]
 	return user, ok
 }
 
-func (ms *MemStore) SetClass(class types.Class) {
+func (ms *MemStore) SetClass(class utils.Class) {
 	ms.classes[class.Id] = class
 }
 
-func (ms *MemStore) GetClass(classId string) (types.Class, bool) {
+func (ms *MemStore) GetClass(classId string) (utils.Class, bool) {
 	class, ok := ms.classes[classId]
 	return class, ok
 }
 
-func (ms *MemStore) GetAllClasses() []types.Class {
-	allClasses := make([]types.Class, 0, len(ms.classes))
+func (ms *MemStore) GetAllClasses() []utils.Class {
+	allClasses := make([]utils.Class, 0, len(ms.classes))
 	for _, class := range ms.classes {
 		allClasses = append(allClasses, class)
 	}
@@ -68,7 +67,7 @@ func (ms *MemStore) GetAllClasses() []types.Class {
 }
 
 func (ms *MemStore) BookClass(userName string, classId string, bookingDate time.Time) (string, error) {
-	classSessionId := generateSessionId(classId, bookingDate)
+	classSessionId := utils.GenerateSessionId(classId, bookingDate)
 
 	session, ok := ms.classSessions[classSessionId]
 	if ok {
@@ -83,8 +82,8 @@ func (ms *MemStore) BookClass(userName string, classId string, bookingDate time.
 	return classSessionId, nil
 }
 
-func (ms *MemStore) GetBookedClasses(userName string) ([]types.BookedClass, error) {
-	var bookedClasses []types.BookedClass
+func (ms *MemStore) GetBookedClasses(userName string) ([]utils.BookedClass, error) {
+	var bookedClasses []utils.BookedClass
 	user, exist := ms.users[userName]
 	if !exist {
 		return bookedClasses, fmt.Errorf("user doesnt exist")
@@ -96,7 +95,7 @@ func (ms *MemStore) GetBookedClasses(userName string) ([]types.BookedClass, erro
 			return bookedClasses, fmt.Errorf("class doesnot exist")
 
 		}
-		bookedClass := types.BookedClass{
+		bookedClass := utils.BookedClass{
 			Class:    class,
 			Sessions: classSessions,
 		}
@@ -107,8 +106,8 @@ func (ms *MemStore) GetBookedClasses(userName string) ([]types.BookedClass, erro
 
 }
 
-func (ms *MemStore) GetClassesStatus(userName string) ([]types.ClassStatus, error) {
-	var classesStatus []types.ClassStatus
+func (ms *MemStore) GetClassesStatus(userName string) ([]utils.ClassStatus, error) {
+	var classesStatus []utils.ClassStatus
 
 	user, exist := ms.users[userName]
 	if !exist {
@@ -122,11 +121,11 @@ func (ms *MemStore) GetClassesStatus(userName string) ([]types.ClassStatus, erro
 
 		}
 
-		classSessionsMap := make(types.ClassSessionsMap)
+		classSessionsMap := make(utils.ClassSessionsMap)
 		currentDate := class.StartDate
 
 		for {
-			currentSessionId := generateSessionId(classId, currentDate)
+			currentSessionId := utils.GenerateSessionId(classId, currentDate)
 			bookedUserNames, exist := ms.classSessions[currentSessionId]
 			if exist {
 				ms.populateClassSessionMap(classSessionsMap, currentSessionId, bookedUserNames)
@@ -139,7 +138,7 @@ func (ms *MemStore) GetClassesStatus(userName string) ([]types.ClassStatus, erro
 			}
 		}
 
-		classStatus := types.ClassStatus{
+		classStatus := utils.ClassStatus{
 			Class:    class,
 			Sessions: classSessionsMap,
 		}
@@ -150,9 +149,9 @@ func (ms *MemStore) GetClassesStatus(userName string) ([]types.ClassStatus, erro
 	return classesStatus, nil
 }
 
-func (ms *MemStore) populateClassSessionMap(classSessionsMap types.ClassSessionsMap, classSessionId string, bookedUserNames []string) error {
-	var users []types.User
-	_, sessionDate, err := getClassIdAndSessionDate(classSessionId)
+func (ms *MemStore) populateClassSessionMap(classSessionsMap utils.ClassSessionsMap, classSessionId string, bookedUserNames []string) error {
+	var users []utils.User
+	_, sessionDate, err := utils.GetClassIdAndSessionDate(classSessionId)
 	if err != nil {
 		return fmt.Errorf("error getting class id and session date")
 	}
@@ -164,29 +163,4 @@ func (ms *MemStore) populateClassSessionMap(classSessionsMap types.ClassSessions
 
 	classSessionsMap[sessionDate] = users
 	return nil
-}
-
-func getClassIdAndSessionDate(classSessionId string) (string, time.Time, error) {
-
-	parts := strings.Split(classSessionId, "#")
-	if len(parts) != 2 {
-		return "", time.Time{}, fmt.Errorf("invalid sessionId format")
-
-	}
-
-	classId := parts[0]
-	sessionDateStr := parts[1]
-
-	sessionDate, err := time.Parse(types.DateFormat, sessionDateStr)
-	if err != nil {
-		return "", time.Time{}, fmt.Errorf("invalid date format in sessionId: %v", err)
-	}
-
-	return classId, sessionDate, nil
-}
-
-func generateSessionId(classId string, bookingDate time.Time) string {
-	formattedTime := bookingDate.Format(types.DateFormat)
-	sessionId := fmt.Sprintf("%s#%s", classId, formattedTime)
-	return sessionId
 }

@@ -1,18 +1,18 @@
 package store
 
 import (
-	"classly/types"
+	"classly/utils"
 	"time"
 )
 
 type Store interface {
-	SetUser(user types.User)
-	GetUser(userName string) (types.User, bool)
-	SetClass(class types.Class)
-	GetClass(classId string) (types.Class, bool)
-	GetAllClasses() []types.Class
+	SetUser(user utils.User)
+	GetUser(userName string) (utils.User, bool)
+	SetClass(class utils.Class)
+	GetClass(classId string) (utils.Class, bool)
+	GetAllClasses() []utils.Class
 	BookClass(userName string, classId string, bookingDate time.Time) (string, error)
 	UpdateUserWithCreatedClass(userName string, classId string)
-	GetBookedClasses(userName string) ([]types.BookedClass, error)
-	GetClassesStatus(userName string) ([]types.ClassStatus, error)
+	GetBookedClasses(userName string) ([]utils.BookedClass, error)
+	GetClassesStatus(userName string) ([]utils.ClassStatus, error)
 }

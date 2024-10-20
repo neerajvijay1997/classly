@@ -3,7 +3,7 @@ package classly_test
 import (
 	"classly/classly"
 	"classly/store"
-	"classly/types"
+	"classly/utils"
 	"testing"
 	"time"
 
@@ -29,8 +29,8 @@ func TestClasslyIntegration(t *testing.T) {
 	require.Equal(t, user2Name, user2Info.UserName, "User2 name should match")
 
 	// User1 creates a class
-	startDateStr := time.Now().Add(24 * time.Hour).Format(types.DateFormat) // Class starts in 1 day
-	endDateStr := time.Now().Add(96 * time.Hour).Format(types.DateFormat)   // Class ends in 4 days
+	startDateStr := time.Now().Add(24 * time.Hour).Format(utils.DateFormat) // Class starts in 1 day
+	endDateStr := time.Now().Add(96 * time.Hour).Format(utils.DateFormat)   // Class ends in 4 days
 	classID, err := cly.CreateClass(user1Name, "Yoga Class", startDateStr, endDateStr, 10)
 	require.NoError(t, err, "Class creation should succeed")
 	require.NotEmpty(t, classID, "ClassID should not be empty")
@@ -42,7 +42,7 @@ func TestClasslyIntegration(t *testing.T) {
 	require.Equal(t, "Yoga Class", classes[0].ClassName, "Class name should match")
 
 	// User2 books the class
-	bookingDateStr := time.Now().Add(48 * time.Hour).Format(types.DateFormat) // Booking time within class start and end
+	bookingDateStr := time.Now().Add(48 * time.Hour).Format(utils.DateFormat) // Booking time within class start and end
 	bookingID, err := cly.BookClass(user2Name, classID, bookingDateStr)
 	require.NoError(t, err, "Booking the class should succeed")
 	require.NotEmpty(t, bookingID, "BookingID should not be empty")
@@ -57,7 +57,7 @@ func TestClasslyIntegration(t *testing.T) {
 	require.Equal(t, "Yoga Class", bookedClass.ClassName, "Booked class name should match")
 	require.Equal(t, user1Name, bookedClass.ClassProviderUserName, "Class provider should be User1")
 	require.Len(t, bookedClass.Sessions, 1, "User2 should have booked 1 session")
-	require.Equal(t, bookingDateStr, bookedClass.Sessions[0].Format(types.DateFormat), "Booked session date should match")
+	require.Equal(t, bookingDateStr, bookedClass.Sessions[0].Format(utils.DateFormat), "Booked session date should match")
 
 	// User1 checks class status
 	classStatuses, err := cly.GetClassesStatus(user1Name)
