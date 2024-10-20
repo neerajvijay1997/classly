@@ -52,6 +52,7 @@ You can run the application with the following command:
 ```bash
 ./classly-app
 ```
+The server is currently running on port 8080.
 
 # Classly API Usage
 
@@ -68,9 +69,9 @@ curl -X GET http://localhost:8080/version
 # {"version":"Classly-v0.1.0"}
 ```
 
-### Register Users
+### Register User
 
-You can register users as follows:
+You can register a user as follows:
 
 ```bash
 curl -X POST http://localhost:8080/signup -H "Content-Type: application/json" -d '{"name": "John Doe", "email": "john.doe@example.com"}'
@@ -81,11 +82,10 @@ curl -X POST http://localhost:8080/signup -H "Content-Type: application/json" -d
 
 ### Check User Registration
 
-To check whether a user is registered, run:
+To check whether a user is registered, run the following command, replacing tA3Qj with the desired user_name:
 
 ```bash
-export USER_NAME="tA3Qj"
-curl -X GET http://localhost:8080/user/$USER_NAME
+curl -X GET http://localhost:8080/user/tA3Qj
 
 # Expected Output:
 # {"user_name":"tA3Qj","name":"John Doe","email":"john.doe@example.com"}
@@ -121,7 +121,7 @@ curl -X GET http://localhost:8080/all-classes
 
 ### Book a Class
 
-One user can book the class as follows:
+User can book the class by running:
 
 ```bash
 curl -X POST http://localhost:8080/bookings -H "Content-Type: application/json" -d '{
@@ -136,11 +136,10 @@ curl -X POST http://localhost:8080/bookings -H "Content-Type: application/json" 
 
 ### View Booked Classes
 
-Users can view their booked classes with the following command:
+Users can view their booked classes by using the following command, substituting tA3Qj with the appropriate user_name:
 
 ```bash
-export USER_NAME="qH8OU"
-curl -X GET http://localhost:8080/booked-classes/$USER_NAME
+curl -X GET http://localhost:8080/booked-classes/tA3Qj
 
 # Expected Output:
 # [{"id":"u2GWN","class_name":"Zumba Class","description":"","class_provider_user_name":"tA3Qj","start_date":"2024-10-20T00:00:00Z","end_date":"2024-10-25T00:00:00Z","capacity":30,"Sessions":["2024-10-21T00:00:00Z"]}]
@@ -148,11 +147,10 @@ curl -X GET http://localhost:8080/booked-classes/$USER_NAME
 
 ### Check Class Status
 
-Class creators can view the status of their created classes using:
+Class creators can check the status of their created classes by using the following command, replacing tA3Qj with the relevant user_name:
 
 ```bash
-export USER_NAME="qH8OU"
-curl -X GET http://localhost:8080/classes-status/$USER_NAME
+curl -X GET http://localhost:8080/classes-status/tA3Qj
 
 # Expected Output:
 # [{"id":"u2GWN","class_name":"Zumba Class","description":"","class_provider_user_name":"tA3Qj","start_date":"2024-10-20T00:00:00Z","end_date":"2024-10-25T00:00:00Z","capacity":30,"Sessions":{"2024-10-21T00:00:00Z":[{"user_name":"qH8OU","name":"Jane Smith","email":"jane.smith@example.com"}]}}]
