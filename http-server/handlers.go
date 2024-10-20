@@ -59,6 +59,16 @@ func (cs *ClasslyServer) getBookedClasses(w http.ResponseWriter, r *http.Request
 	cs.writeJSONResponse(w, http.StatusOK, bookedClasses)
 }
 
+func (cs *ClasslyServer) getAllClasses(w http.ResponseWriter, r *http.Request) {
+	classes, err := cs.classly.GetAllClasses()
+	if err != nil {
+		cs.writeErrorResponse(w, http.StatusInternalServerError, "failed to get all classes")
+		return
+	}
+
+	cs.writeJSONResponse(w, http.StatusOK, classes)
+}
+
 func (cs *ClasslyServer) getClassesStatus(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userName := params["username"]

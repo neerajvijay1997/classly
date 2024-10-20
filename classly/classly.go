@@ -77,8 +77,8 @@ func (cly *Classly) CreateClass(userName, className string, startDateStr, endDat
 	return classId, nil
 }
 
-func (cly *Classly) GetAllClasses() []types.Class {
-	return cly.store.GetAllClasses()
+func (cly *Classly) GetAllClasses() ([]types.Class, error) {
+	return cly.store.GetAllClasses(), nil
 }
 
 func (cly *Classly) GetClassesStatus(userName string) ([]types.ClassStatus, error) {
@@ -113,9 +113,7 @@ func (cly *Classly) GetVersion() string {
 // TODO: Move to utils package
 // ParseTime converts a string to time.Time based on the provided layout (current layout: "2006-01-02")
 func ParseTime(timeStr string) (time.Time, error) {
-	// TODO: Use constant
-	layout := "2006-01-02"
-	parsedTime, err := time.Parse(layout, timeStr)
+	parsedTime, err := time.Parse(types.DateFormat, timeStr)
 	if err != nil {
 		return time.Time{}, err
 	}

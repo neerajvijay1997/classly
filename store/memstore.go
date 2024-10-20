@@ -177,8 +177,7 @@ func getClassIdAndSessionDate(classSessionId string) (string, time.Time, error) 
 	classId := parts[0]
 	sessionDateStr := parts[1]
 
-	// TODO: Use constant
-	sessionDate, err := time.Parse("2006-01-02", sessionDateStr)
+	sessionDate, err := time.Parse(types.DateFormat, sessionDateStr)
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("invalid date format in sessionId: %v", err)
 	}
@@ -187,8 +186,7 @@ func getClassIdAndSessionDate(classSessionId string) (string, time.Time, error) 
 }
 
 func generateSessionId(classId string, bookingDate time.Time) string {
-	// TODO: Use constant
-	formattedTime := bookingDate.Format("2006-01-02")
+	formattedTime := bookingDate.Format(types.DateFormat)
 	sessionId := fmt.Sprintf("%s#%s", classId, formattedTime)
 	return sessionId
 }
