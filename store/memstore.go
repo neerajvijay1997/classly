@@ -20,8 +20,9 @@ func NewMemStore() *MemStore {
 	}
 }
 
-func (ms *MemStore) SetUser(user utils.User) {
+func (ms *MemStore) SetUser(user utils.User) error {
 	ms.users[user.UserName] = user
+	return nil
 }
 
 func (ms *MemStore) updateUserForClassSession(userName string, bookingDate time.Time, classId string) {
@@ -38,10 +39,11 @@ func (ms *MemStore) updateUserForClassSession(userName string, bookingDate time.
 	ms.users[userName] = user
 }
 
-func (ms *MemStore) UpdateUserWithCreatedClass(userName string, classId string) {
+func (ms *MemStore) UpdateUserWithCreatedClass(userName string, classId string) error {
 	user := ms.users[userName]
 	user.CreatedClassIds = append(user.CreatedClassIds, classId)
 	ms.users[userName] = user
+	return nil
 }
 
 func (ms *MemStore) GetUser(userName string) (utils.User, bool) {
@@ -49,8 +51,9 @@ func (ms *MemStore) GetUser(userName string) (utils.User, bool) {
 	return user, ok
 }
 
-func (ms *MemStore) SetClass(class utils.Class) {
+func (ms *MemStore) SetClass(class utils.Class) error {
 	ms.classes[class.Id] = class
+	return nil
 }
 
 func (ms *MemStore) GetClass(classId string) (utils.Class, bool) {
@@ -58,12 +61,12 @@ func (ms *MemStore) GetClass(classId string) (utils.Class, bool) {
 	return class, ok
 }
 
-func (ms *MemStore) GetAllClasses() []utils.Class {
+func (ms *MemStore) GetAllClasses() ([]utils.Class, error) {
 	allClasses := make([]utils.Class, 0, len(ms.classes))
 	for _, class := range ms.classes {
 		allClasses = append(allClasses, class)
 	}
-	return allClasses
+	return allClasses, nil
 }
 
 func (ms *MemStore) BookClass(userName string, classId string, bookingDate time.Time) (string, error) {

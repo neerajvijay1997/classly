@@ -16,8 +16,10 @@ func TestClasslyIntegration(t *testing.T) {
 	cly := classly.InitializeClassly(memStore)
 
 	// Create multiple users
-	user1Name := cly.CreateUser("Alice", "alice@example.com")
-	user2Name := cly.CreateUser("Bob", "bob@example.com")
+	user1Name, err := cly.CreateUser("Alice", "alice@example.com")
+	require.NoError(t, err, "User creation should succeed")
+	user2Name, err := cly.CreateUser("Bob", "bob@example.com")
+	require.NoError(t, err, "User creation should succeed")
 
 	// Verify users exist
 	user1Info, user1Exists := cly.GetUserInfo(user1Name)

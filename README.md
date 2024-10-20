@@ -12,7 +12,7 @@ This server provides a class booking system designed for studios. It allows stud
 
 ### Usage Scenarios:
 - **As a Studio Owner**: I want to create classes for my studio so that my members can attend them.
-- **As a Studio Member**: I want to book classes at my studio so I can attend them.
+- **As a Studio Member**: I want to book classes at studio so I can attend them.
 
 This system is ideal for fitness studios, workshops, and any other activity-based studios where scheduling and booking management is required.
 

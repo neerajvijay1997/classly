@@ -20,7 +20,12 @@ func (cs *ClasslyServer) signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userName := cs.classly.CreateUser(signUpRequest.Name, signUpRequest.Email)
+	userName, err := cs.classly.CreateUser(signUpRequest.Name, signUpRequest.Email)
+	if err != nil {
+		cs.writeErrorResponse(w, http.StatusInternalServerError, "Failed to create user")
+		return
+	}
+
 	response := SignUpResponse{
 		Message:  "User registered successfully",
 		UserName: userName,
