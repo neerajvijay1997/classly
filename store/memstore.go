@@ -128,7 +128,10 @@ func (ms *MemStore) GetClassesStatus(userName string) ([]utils.ClassStatus, erro
 			currentSessionId := utils.GenerateSessionId(classId, currentDate)
 			bookedUserNames, exist := ms.classSessions[currentSessionId]
 			if exist {
-				ms.populateClassSessionMap(classSessionsMap, currentSessionId, bookedUserNames)
+				err := ms.populateClassSessionMap(classSessionsMap, currentSessionId, bookedUserNames)
+				if err != nil {
+					return classesStatus, fmt.Errorf("error populating class session map: %w", err)
+				}
 			}
 
 			if currentDate == class.EndDate {

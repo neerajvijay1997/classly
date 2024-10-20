@@ -5,7 +5,7 @@ import "time"
 type Class struct {
 	Id        string `json:"id"`
 	ClassName string `json:"class_name"`
-	// TODO: Handle
+	// TODO: Handle description
 	Description           string    `json:"description"`
 	ClassProviderUserName string    `json:"class_provider_user_name"`
 	StartDate             time.Time `json:"start_date"`
